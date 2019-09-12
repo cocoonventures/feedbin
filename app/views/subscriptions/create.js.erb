@@ -1,10 +1,21 @@
-<% if @results[:options].any? %>
-  feedbin.modalBox('<%= j render partial: "choices", locals: { options: @results[:options].first } %>');
-<% elsif @results[:success].any? %>
-  feedbin.updateFeeds('<%= j render partial: 'feeds/feeds', locals: {collections: @collections, tags: @tags, feeds: @feeds} %>');
-  feedbin.subscribeStatus('You have subscribed.');
-  $("[data-feed-id=<%= @click_feed %>] a").click();
-  feedbin.updateTitle('<%= j @user.title_with_count %>')
-<% else %>
-  feedbin.subscribeStatus('No feed found.');
+<%= render partial: 'shared/update_feeds', locals: {feed_data: @feed_data} %>
+feedbin.showNotification('You have subscribed.');
+feedbin.hideSubscribe();
+<% @subscriptions.each do |subscription| %>
+    <% if subscription.title.present? %>
+        feedbin.data.user_titles[<%= subscription.feed_id %>] = '<%= j subscription.title %>';
+    <% end %>
 <% end %>
+
+var feed = $('[data-feed-id=<%= @click_feed %>] a')
+feed.click();
+
+tagParent = feed.closest('[data-tag-id]')
+if (tagParent.find(".drawer").data('hidden') == true) {
+    tagParent.find('[data-behavior="toggle_drawer"]').submit();
+}
+
+feedbin.scrollTo($('[data-feed-id=<%= @click_feed %>]'), $('.feeds'))
+
+$('.welcome').remove();
+$('.modal-purpose-subscribe').modal('hide')

@@ -1,14 +1,23 @@
-<% if services.any? %>
-<div class="entry-button-wrap">
-  <div class="dropdown-wrap button-toggle-share-menu entry-button">
-    <a class="entry-button" data-behavior="toggle_share_menu" href="#" title="Share">
-      <%= render partial: "shared/svg/share" %>
-    </a>
-    <ul>
-      <% services.each do |service| %>
-        <li><a href="<%= service[:url] %>" target="<%= service[:target] %>"><%= service[:label] %></a></li>
-      <% end %>
-    </ul>
-  </div>
-</div>
+<% if services.present? %>
+    <div class="entry-button-wrap">
+        <div class="dropdown-wrap button-toggle-share-menu entry-button">
+            <a class="entry-button" data-behavior="toggle_share_menu toggle_dropdown" href="#" title="Share">
+                <%= svg_tag 'icon-share', size: '16x16' %>
+            </a>
+            <div class="dropdown-content">
+                <ul data-behavior="share_options">
+                    <% services.each_with_index do |service, row| %>
+                        <li class="share-option">
+                            <%= link_to service[:url], service[:html_options] do %>
+                                <div class="label"><%= service[:label] %></div>
+                                <% if row < 9 %>
+                                    <i class="share-keyboard"><%= row + 1 %></i>
+                                <% end %>
+                            <% end %>
+                        </li>
+                    <% end %>
+                </ul>
+            </div>
+        </div>
+    </div>
 <% end %>

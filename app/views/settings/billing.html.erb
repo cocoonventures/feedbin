@@ -1,63 +1,101 @@
-<h3>Update Billing</h3>
-<% if ENV['STRIPE_API_KEY'] %>
-  <% if @user.last_4_digits %>
-    <p class="billing-promo"><span class="cc"><span class="cc-stripe"></span></span>Your current card **** **** **** <%= @user.last_4_digits %></p>
-  <% end %>
-  <div data-behavior="stripe_error" class="alert alert-error hide"></div>
-  <%= form_tag settings_update_credit_card_path, data: { behavior: 'credit_card_form' } do %>
-    <%= hidden_field_tag :stripe_token, nil, data: { behavior: 'stripe_token' } %>
-    <%= render partial: 'shared/credit_card_form' %>
-    <%= submit_tag "Update", class: 'button' %>    
-  <% end %>
+<% content_for :head do %>
+    <%= javascript_include_tag "https://js.stripe.com/v3/" %>
+    <script>
+        var feedbinBilling = {}
+        feedbinBilling.stripe = Stripe("<%= STRIPE_PUBLIC_KEY %>");
+        feedbinBilling.elements = feedbinBilling.stripe.elements();
+        feedbinBilling.paymentRequests = {};
+        feedbinBilling.button = {
+            destroy: function(){}
+        };
+        feedbinBilling.stripeTokenHandler = function(token) {
+            var form = document.getElementById('payment-form');
+            var hiddenInput = document.getElementById('stripe_token');
+            hiddenInput.setAttribute('value', token.id);
+            form.submit();
+        };
+        feedbinBilling.updatePaymentRequest = function(plan) {
+            feedbinBilling.button.destroy()
+            feedbinBilling.button = feedbinBilling.elements.create('paymentRequestButton', {
+                paymentRequest: feedbinBilling.paymentRequests[plan],
+                style: {
+                    paymentRequestButton: {
+                        type: 'default',
+                        theme: 'dark',
+                        height: '36px',
+                    },
+                },
+            });
+            feedbinBilling.paymentRequests[plan].canMakePayment().then(function(result) {
+                if (result) {
+                    if (result.applePay === true) {
+                        $("body").addClass("apple-pay");
+                        $("#billing_method_apple_pay").prop("checked", true);
+                    } else {
+                        $("#billing_method_pay_with_google").prop("checked", true);
+                    }
+                    $("body").addClass("native-payment");
+                    feedbinBilling.button.mount('#payment_request_button');
+                } else {
+                    $("body").addClass("no-native-payment");
+                }
+            });
+            feedbinBilling.paymentRequests[plan].on('token', function(event) {
+                feedbinBilling.stripeTokenHandler(event.token);
+                $("#payment_request_button").html("<small>Loading…</small>");
+                event.complete('success');
+            });
+        }
+        <% @plans.each do |plan| %>
+            feedbinBilling.paymentRequests[<%= plan.id %>] = feedbinBilling.stripe.paymentRequest({
+                country: 'US',
+                currency: 'usd',
+                total: {
+                    label: '<%= "Feedbin #{plan.name} Subscription" %>',
+                    amount: <%= plan.price_in_cents %>,
+                },
+            });
+            <% if plan == @default_plan %>
+                feedbinBilling.defaultPlan = <%= plan.id %>;
+            <% end %>
+        <% end %>
 
-  <h3>Change your Plan</h3>
-  <table class="table table-bordered" style="margin-bottom: 0;">
-    <tr>
-      <th>Plan</th>
-      <th>Price</th>
-      <th>&nbsp;</th>
-    </tr>
-    <% @plans.each do |plan| %>
-      <tr>
-          <td><%= plan.name %></td>
-          <td><%= number_to_currency(plan.price) %>/<%= plan.name %></td>
-          <td>
-            <% if @user.plan.id == plan.id %>
-              Your plan
-            <% else %>
-              <%= form_tag settings_update_plan_path, data: { behavior: 'change_plan' }, class: 'no-margin' do %>
-                <%= hidden_field_tag 'plan', plan.id %>
-                <%= button_tag 'Switch', data: { confirm: 'Are you sure you want to change plans?' }, class: 'button' %>
-              <% end %>    
-            <% end %>    
-          </td>
-      </tr>
-    <% end %>
-  </table>
-
-  <p><small>Plan changes are pro-rated.</small></p>
-
-  <h3 class="por">
-    Payment History
-    <% if @next_payment %>
-      <p class="inline-subhead"><small>Next payment: <time datetime="<%= @next_payment.to_s(:datetime) %>"><%= @next_payment.to_s(:feed) %> UTC</time></small></p>
-    <% end %>
-  </h3>
-
-  <table class="table table-bordered">
-    <tr>
-      <th>Date</th>
-      <th>Receipt</th>
-      <th>Amount</th>
-    </tr>
-    <% @billing_events.each do |invoice| %>
-    <tr>
-      <td><%= Time.at(invoice.details.data.object.date).to_s(:date) %></td>
-      <td><%= link_to 'Receipt', invoice %></td>
-      <td><%= invoice.details.data.object.currency.upcase %> <%= number_to_currency(invoice.details.data.object.total.to_f / 100) %></td>
-    </tr>
-    <% end %>
-  </table>
-<% else %>
-  <p>Billing disabled. <code>STRIPE_API_KEY</code> and <code>STRIPE_PUBLIC_KEY</code> are missing.</p>
+        $(function(){
+            if ($("#payment_request_button").length > 0) {
+                feedbinBilling.updatePaymentRequest(feedbinBilling.defaultPlan);
+                $(document).on ('change', '[data-behavior~=billing_method_radio]', function() {
+                    var selected = $(this).attr('id');
+                    $('[data-behavior~=billing_method_radio]').each(function() {
+                        var option = $(this).attr('id');
+                        $('body').removeClass(option);
+                    });
+                    $('body').addClass(selected)
+                });
+                $(document).on ('change', '[data-behavior~=plan_select]', function() {
+                    var selected = $(this).attr('id');
+                    var plan = $(this).data('plan-id');
+                    feedbinBilling.updatePaymentRequest(plan);
+                    $('[data-behavior~=billing_help_text]').addClass('hide');
+                    $("[data-plan-id=" + selected + "]").removeClass('hide');
+                });
+            }
+        });
+    </script>
 <% end %>
+<div class="settings-content-inner">
+    <div class="settings-outer">
+        <h2>Billing</h2>
+    </div>
+    <% if ENV['STRIPE_API_KEY'] %>
+        <% if @user.plan.stripe_id == 'trial' %>
+            <%= render partial: 'shared/billing/billing_subscribe', locals: {subscribe_title: "Plan"} %>
+        <% else %>
+            <%= render partial: 'shared/billing/billing_status' %>
+        <% end %>
+    <% else %>
+        <p>Billing disabled. <code>STRIPE_API_KEY</code> and <code>STRIPE_PUBLIC_KEY</code> are missing.</p>
+    <% end %>
+</div>
+<script>
+    $.get("<%= settings_payment_details_path %>");
+</script>

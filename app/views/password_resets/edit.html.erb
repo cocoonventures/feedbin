@@ -1,24 +1,19 @@
 <% @class = 'login' %>
 <div class="login-wrap">
-  <a href="/"><%= render partial: "shared/svg/logo" %></a>
-  
-  <h3 class="box-header">Reset Password</h3>
-  <div class="box">
-    
-    <%= render partial: 'shared/flash', locals: {flash: flash} %>
-
-    <%= form_for @user, url: password_reset_path(params[:id]) do |f| %>
-      <% if @user.errors.any? %>
-        <div class="alert alert-error">
-          <%= @user.errors.full_messages.join('. ') %>.
-        </div>
-      <% end %>
-      <%= f.password_field :password, placeholder: 'Password' %>
-
-      <div class="text-right">
-        <%= f.submit "Reset Password", class: 'button' %>
-      </div>
-    <% end %>
-    
-  </div>
+    <a href="/" class="logo hide-text">Feedbin</a>
+    <div class="box">
+        <%= render partial: 'shared/flash', locals: {flash: flash} %>
+        <h3 class="box-header">Reset Password</h3>
+        <%= form_for @user, url: password_reset_path(params[:id]) do |f| %>
+            <% if @user.errors.present? %>
+                <div class="alert alert-error">
+                    <%= @user.errors.full_messages.join('. ') %>.
+                </div>
+            <% end %>
+            <p>
+                <%= f.password_field :password, placeholder: 'Password' %>
+            </p>
+            <%= f.submit "Reset Password", class: 'button' %>
+        <% end %>
+    </div>
 </div>

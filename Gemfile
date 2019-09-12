@@ -1,62 +1,104 @@
-source 'https://rubygems.org'
-ruby '2.0.0'
+source "https://rubygems.org"
+git_source(:github) { |name| "https://github.com/#{name}.git" }
 
-gem 'rails', '~>4.0.0'
+gem "rails", "= 5.1.7"
+
+gem "rails-deprecated_sanitizer"
+gem "rails-controller-testing"
+gem "rails_autolink"
+
+gem "nokogumbo", "= 1.4.9"
 
 group :development do
-  gem 'better_errors'
-  gem 'quiet_assets'
-  gem 'capistrano-unicorn', github: 'sosedoff/capistrano-unicorn', ref: '52376ad', require: false
+  gem "capistrano"
+  gem "capistrano-bundler"
+  gem "capistrano-rbenv"
+  gem "capistrano-rails"
+  gem "better_errors"
+  gem "silencer"
+  gem "benchmark-ips"
+  gem "listen"
+  gem "htmlbeautifier"
+  gem "spring"
 end
 
-group :production do
-  gem "therubyracer", require: 'v8'
+group :development, :test do
+  gem "puma"
+  gem "minitest"
+  gem "stripe-ruby-mock", "= 2.5.0", require: "stripe_mock"
+  gem "faker"
+  gem "webmock"
+  gem "minitest-stub-const"
+  gem "coveralls", require: false
+  gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
+  gem "capybara", "~> 2.13"
+  gem "selenium-webdriver"
+  gem "minitest-stub_any_instance"
+  gem "standard"
 end
 
-gem 'pg'
-gem 'unicorn'
+gem "pg", "< 1.0"
+gem "unicorn"
 
-gem 'nokogiri', '1.5.10'
+gem "feedjira", github: "feedbin/feedjira", ref: "e6b7b11"
+gem "feedkit", github: "feedbin/feedkit", branch: "master"
 
-gem 'opml_saw',              github: 'feedbin/opml_saw',              ref: '61d8c2d'
-gem 'feedzirra',             github: 'feedbin/feedzirra',             ref: 'c9a2188'
-gem 'html-pipeline',         github: 'benubois/html-pipeline',        ref: '652162b'
-gem 'activerecord-import',   github: 'feedbin/activerecord-import',   ref: 'b7851b1'
-gem 'multi_fetch_fragments', github: 'feedbin/multi_fetch_fragments', ref: 'e99b6f7'
-gem 'redis',                 github: 'redis/redis-rb',                ref: '77c2a99'
+gem "opml_saw", github: "feedbin/opml_saw", ref: "61d8c2d"
+gem "html-pipeline", github: "feedbin/html-pipeline", ref: "676376c"
+gem "grocer-pushpackager", github: "feedbin/grocer-pushpackager", ref: "6b01b4e", require: "grocer/pushpackager"
+gem "html_diff", github: "feedbin/html_diff", ref: "c7c15ce"
+gem "carrierwave_direct", github: "feedbin/carrierwave_direct", ref: "a0bc323"
 
-gem 'sass-rails', '~>4.0.0'
-gem 'coffee-rails', '~>4.0.0'
-gem 'uglifier', '>= 1.0.3'
-gem 'autoprefixer-rails', '~> 0.7'
+gem "mini_racer"
+gem "sassc-rails"
+gem "coffee-rails"
+gem "uglifier", "= 4.1.11"
+gem "autoprefixer-rails"
+gem "rubyzip"
 
-gem 'jquery-rails'
-gem 'postmark-rails'
-gem 'dalli'
-gem 'will_paginate'
-gem 'sanitize'
-gem 'longurl'
-gem 'carrierwave'
-gem 'carrierwave_direct'
-gem 'fog'
-gem 'clockwork'
-gem 'bust_rails_etags'
-gem 'jbuilder'
-gem 'request_exception_handler'
-gem 'bcrypt-ruby', '~> 3.0.0'
-gem 'honeybadger'
-gem 'addressable', require: 'addressable/uri'
-gem 'librato-rails', '= 0.9.0'
-gem 'foreman'
-gem 'yajl-ruby', require: nil
-gem 'readability_parser'
-gem 'lograge'
-
-# Sidekiq
-gem 'sidekiq'
-gem 'slim'
-gem 'sinatra', require: nil
+gem "apnotic"
+gem "json"
+gem "activerecord-import", ">= 0.4.1"
+gem "redis"
+gem "jquery-rails"
+gem "dalli"
+gem "will_paginate"
+gem "sanitize"
+gem "carrierwave"
+gem "fog-aws"
+gem "clockwork"
+gem "jbuilder"
+gem "bcrypt-ruby"
+gem "honeybadger"
+gem "addressable", require: "addressable/uri"
+gem "librato-rails", "= 1.4.2"
+gem "foreman", "= 0.63.0"
+gem "readability_parser"
+gem "lograge"
+gem "connection_pool"
+gem "httparty"
+gem "oauth"
+gem "evernote_oauth"
+gem "rmagick", require: false
+gem "reverse_markdown"
+gem "htmlentities"
+gem "responders", "~> 2.0"
+gem "dotenv-rails"
+gem "kramdown"
+gem "premailer-rails"
+gem "http"
+gem "net-http-persistent"
+gem "elasticsearch", "~> 2.0"
+gem "elasticsearch-model", "~> 2.0"
+gem "sidekiq"
+gem "raindrops"
+gem "curb"
+gem "twitter"
+gem "twitter-text"
+gem "bootsnap", require: false
+gem "unicode-emoji"
+gem "rack-attack"
 
 # Stripe
-gem 'stripe'
-gem 'stripe_event'
+gem "stripe"
+gem "stripe_event"

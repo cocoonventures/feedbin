@@ -1,4 +1,4 @@
-class CreateImportItems < ActiveRecord::Migration
+class CreateImportItems < ActiveRecord::Migration[4.2]
   def change
     create_table :import_items do |t|
       t.integer :import_id
@@ -6,8 +6,7 @@ class CreateImportItems < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     add_index :import_items, :import_id
-    
   end
 end

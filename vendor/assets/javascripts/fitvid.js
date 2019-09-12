@@ -9,7 +9,8 @@
 
   $.fn.fitVids = function( options ) {
     var settings = {
-      customSelector: null
+      customSelector: null,
+      maxAspectRatio: 0.75
     };
 
     if(!document.getElementById('fit-vids-style')) {
@@ -52,6 +53,7 @@
         "iframe[src*='youtube.com']",
         "iframe[src*='youtube-nocookie.com']",
         "iframe[src*='kickstarter.com'][src*='video.html']",
+        "iframe[src*='embed.itunes.apple.com']",
         "object",
         "embed"
       ];
@@ -69,6 +71,9 @@
         var height = ( this.tagName.toLowerCase() === 'object' || ($this.attr('height') && !isNaN(parseInt($this.attr('height'), 10))) ) ? parseInt($this.attr('height'), 10) : $this.height(),
             width = !isNaN(parseInt($this.attr('width'), 10)) ? parseInt($this.attr('width'), 10) : $this.width(),
             aspectRatio = height / width;
+            if (aspectRatio > settings.maxAspectRatio) {
+              aspectRatio = settings.maxAspectRatio;
+            }
         if(!$this.attr('id')){
           var videoID = 'fitvid' + Math.floor(Math.random()*999999);
           $this.attr('id', videoID);

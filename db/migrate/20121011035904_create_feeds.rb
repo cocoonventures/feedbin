@@ -1,5 +1,4 @@
-class CreateFeeds < ActiveRecord::Migration
-
+class CreateFeeds < ActiveRecord::Migration[4.2]
   def change
     create_table :feeds do |t|
       t.string :feed_title
@@ -9,9 +8,7 @@ class CreateFeeds < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     add_index :feeds, :feed_url, unique: true
-    
   end
-  
 end

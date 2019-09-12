@@ -1,5 +1,4 @@
-class CreateSubscriptions < ActiveRecord::Migration
-
+class CreateSubscriptions < ActiveRecord::Migration[4.2]
   def change
     create_table :subscriptions do |t|
       t.integer :user_id
@@ -7,10 +6,9 @@ class CreateSubscriptions < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     add_index :subscriptions, :user_id
     add_index :subscriptions, :feed_id
     add_index :subscriptions, [:user_id, :feed_id], unique: true
   end
-  
 end

@@ -1,8 +1,10 @@
-feedbin.updateFeeds('<%= j render partial: 'feeds/feeds', locals: {collections: @collections, tags: @tags, feeds: @feeds} %>');
-feedbin.updateEntries('');
+<%= render partial: 'shared/update_feeds', locals: {feed_data: @feed_data} %>
+feedbin.showPanel(1);
+if (feedbin.data.viewMode != 'view_starred') {
+$('.feed-id-<%= @subscription.feed_id %>').remove();
+}
 feedbin.updateEntryContent('');
-$('.app').addClass('nothing-selected').removeClass('feed-selected entry-selected')
-$('[data-behavior~=show_tags_form]').replaceWith('<%= j render partial: "shared/buttons/tag", locals: {feed: nil, tags: nil, tag: nil} %>');
-$('[data-behavior~=mark_all_as_read]').replaceWith('<%= j render partial: "shared/buttons/mark_all_as_read", locals: {type: nil, data: nil} %>');
-$('[data-behavior~=unsubscribe]').replaceWith('<%= j render partial: "shared/buttons/unsubscribe", locals: {feed: nil} %>');
-feedbin.updateTitle('<%= j @user.title_with_count %>')
+$('body').addClass('nothing-selected').removeClass('feed-selected entry-selected')
+feedbin.disableMarkRead()
+feedbin.hideSearch()
+$('.modal').modal('hide')

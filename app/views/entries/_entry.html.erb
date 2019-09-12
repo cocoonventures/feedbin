@@ -1,16 +1,56 @@
 <% present entry do |entry_presenter| %>
-<li class="<%= entry_presenter.classes %>" data-entry-id="<%= entry.id %>" <%= rtl(entry.summary) %>>
-    <%= entry_presenter.entry_link do %>
-      <%= entry_presenter.favicon %>
-      <span class="state-indicators">
-        <i class="icon-star-filled"></i>
-      </span>
-      <time datetime="<%= entry_presenter.datetime %>" class="time"><%= entry_presenter.published_date %></time>
-      <h2 class="title"><%= entry_presenter.title %></h2>
-      <p class="feed-title" data-behavior="user_title" data-feed-id="<%= entry.feed.id %>"><%= entry.feed.title %></p>
-      <% if entry_presenter.has_content? %>
-        <p class="body"><%= entry.summary.html_safe %></p>
-      <% end %>
-    <% end %>
-  </li>
+    <li data-entry-id="<%= entry.id %>" class="feed-id-<%= entry.feed_id %> <%= entry_presenter.media_class %>" <%= rtl(entry.summary) %>>
+        <div class="mark-above-read" data-behavior="mark_above_read"><span><i>Mark Above as Read</i></span></div>
+        <div class="mark-below-read" data-behavior="mark_below_read"><span><i>Mark Below as Read</i></span></div>
+        <a
+        class="wrap"
+        data-behavior="selectable open_item show_entry_content entry_info"
+        data-entry-id="<%= entry.id %>"
+        data-entry-info="<%= {id: entry.id, feed_id: entry.feed_id, published: entry.published.to_i}.to_json %>"
+        data-remote="true"
+        data-mark-as-read-path="/entries/<%= entry.id %>/mark_as_read"
+        data-recently-read-path="/entries/<%= entry.id %>/recently_read"
+        data-url="<%= entry.fully_qualified_url %>"
+        href="/entries/<%= entry.id %>"
+    >
+            <span class="entries-inner-wrap">
+                <button class="button-text entry-actions-wrap" data-behavior="show_entry_actions">
+                    <i class="status-indicator icon-entry-actions"></i>
+                </button>
+                <%= entry_presenter.profile_image %>
+                <div class="inline-content-wrap">
+                    <div class="meta-wrap">
+                        <p class="feed-title">
+                            <%= entry_presenter.feed_title %>
+                        </p>
+                        <%= render partial: "shared/entry_status" %>
+                    </div>
+                    <div class="title-wrap">
+                        <div class="title-inner-wrap">
+                            <h2 class="title">
+                                <%= entry_presenter.profile_image %>
+                                <span><%= entry_presenter.title %></span>
+                            </h2>
+                            <%= render partial: "shared/entry_status" %>
+                        </div>
+                        <%= entry_presenter.summary %>
+                    </div>
+                    <div class="footer-meta-wrap">
+                        <%= render partial: "shared/entry_status" %>
+                        <%= content_tag(:time, entry.published, datetime: entry.published.iso8601, class: 'time timeago') %>
+                        <%= svg_tag "icon-retweet", size: "13x9" %>
+                        <%= svg_tag "icon-media", size: "8x9" %>
+                    </div>
+                    <% if entry.tweet? && entry.main_tweet.quoted_status? %>
+                        <p class="title quoted-summary">
+                            <strong><%= entry_presenter.tweet_name(entry.main_tweet.quoted_status) %></strong> &ndash;
+                            <%= entry_presenter.retweet_text %>
+                        </p>
+                    <% end %>
+
+                    <%= entry_presenter.image %>
+                </div>
+            </span>
+        </a>
+    </li>
 <% end %>

@@ -1,12 +1,15 @@
-<button class="back-button" data-behavior="back_to_feeds"></button>
+<button class="back-button" data-behavior="show_feeds">
+    <%= svg_tag "icon-arrow", size: "9x15" %>
+</button>
 <% if @feed %>
-  <% present feed do |feed_presenter| %>
-    <%= feed_presenter.favicon %>
-    <span data-behavior="user_title" data-feed-id="<%= @feed.id %>"><%= @feed.title %></span>
-  <% end %>
+    <% present feed do |feed_presenter| %>
+        <span class="feed-title-wrap">
+            <span data-behavior="user_title" data-feed-id="<%= @feed.id %>"><%= @feed.title %></span>
+        </span>
+    <% end %>
 <% else %>
-  <span class="favicon-wrap">
-    <span class="favicon <%= @collection_favicon %>"></span>
-  </span>
-  <%= @collection_title %>
+    <span class="feed-title-wrap">
+        <%= @collection_title %>
+    </span>
 <% end %>
+<button class="search-button" data-behavior="toggle_search"><%= svg_tag "icon-search", size: "16x16" %></button>

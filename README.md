@@ -1,21 +1,23 @@
 Feedbin
 =======
 
-Feedbin is a simple, fast and nice looking RSS reader. 
+Feedbin is a simple, fast and nice looking RSS reader.
 
-![Feedbin Screenshot](https://raw.github.com/feedbin/feedbin/master/app/assets/images/screenshots/_main.png)
+![Feedbin Screenshot](https://feedbin.github.io/files/feedbin_screenshot.jpeg)
 
 Introduction
 ------------
 
 Feedbin is a web based RSS reader. It provides a user interface for reading and managing feeds as well as a [REST-like API](https://github.com/feedbin/feedbin-api) for clients to connect to.
 
-The main Feedbin project is a [Rails 4.0](http://rubyonrails.org/) application. In addition to the main project there are several other services that provide additional functionality. None of these services are required to get Feedbin running locally, but they all provide important functionality that you would want for a production install.
+If you would like to try Feedbin out you can [sign up](https://feedbin.com/) for an account.
+
+The main Feedbin project is a [Rails 5](http://rubyonrails.org/) application. In addition to the main project there are several other services that provide additional functionality. None of these services are required to get Feedbin running locally, but they all provide important functionality that you would want for a production install.
 
  - [**refresher:**](https://github.com/feedbin/refresher)
    Refresher is the service that does feed refreshing. Feed refreshes are scheduled as background jobs using [Sidekiq](https://github.com/mperham/sidekiq). Refresher is kept separate so it can be scaled independently. It's also a benefit to not have to load all of Rails for this service.
- - [**polyptych:**](https://github.com/feedbin/polyptych)
-   Polyptych is an API for fetching favicons. Favicons are compiled into a single CSS file as base64 encoded background images. Polyptych is another Rails App. 
+ - [**image:**](https://github.com/feedbin/image)
+   Image is the service that finds images to be [associated with articles](https://feedbin.com/blog/2015/10/22/image-previews/)
  - [**camo:**](https://github.com/atmos/camo)
    Camo is an https image proxy. In production Feedbin is SSL only. One issue with SSL is all assets must be served over SSL as well or the browser will show insecure content warnings. Camo proxies all image requests through an SSL enabled host to prevent this.
 
@@ -23,66 +25,45 @@ Requirements
 ------------
 
  - Mac OS X or Linux
- - [Ruby 2.0](http://www.ruby-lang.org/en/)
- - [Postgres 9.2.4](http://www.postgresql.org/)
- - [Redis 2.6.13](http://redis.io/)
+ - [Ruby 2.3.1](http://www.ruby-lang.org/en/)
+ - [Postgres 10](http://www.postgresql.org/)
+ - [Redis > 2.8](http://redis.io/)
+ - [Memcached](https://memcached.org/)
+ - [Elasticsearch 2.4.X](https://www.elastic.co/downloads/past-releases/elasticsearch-2-4-5)
 
 Installation
 -------------
-Ultimately you need a Ruby environment and a Rack compatible application server. For development [Pow](http://pow.cx/) is recommended.
+Ultimately, you'll need a Ruby environment and a Rack compatible application server. For development [Pow](http://pow.cx/) is recommended.
 
-Feedbin uses environment variables for configuration. Feedbin will run without any of these, but various features and functionality will be turned off.
+First, install the dependencies listed under requirements.
 
-| Environment Variable     | Description                                                                        |
-|--------------------------|------------------------------------------------------------------------------------|
-| ASSET_HOST               | Pull CDN URL                                                                       |
-| AWS_ACCESS_KEY_ID        | Used for file uploads - http://aws.amazon.com                                      |
-| AWS_S3_BUCKET            | Used for file uploads - http://aws.amazon.com                                      |
-| AWS_SECRET_ACCESS_KEY    | Used for file uploads - http://aws.amazon.com                                      |
-| CAMO_HOST                | CDN to point to the camo host                                                      |
-| CAMO_KEY                 | Used to rewrite assets to use https - https://github.com/atmos/camo                |
-| DATABASE_URL             | Database connection string - postgres://USER:PASS@IP:PORT/DATABASE                 |
-| DEFAULT_URL_OPTIONS_HOST | Mailer host - feedbin.me                                                           |
-| FEEDBIN_HOMEPAGE_REPO    | Git URL to a Rails engine that provides a custom homepage                          |
-| FROM_ADDRESS             | Used as a reply-to email address                                                   |
-| GAUGES_SITE_ID           | [gaug.es](http://gaug.es) analytics identifier                                     |
-| HONEYBADGER_API_KEY      | Used for error reporting - http://honeybadger.io                                   |
-| LIBRATO_SOURCE           | Default source for metrics - feedbin                                               |
-| LIBRATO_TOKEN            | Used for reporting stats - http://metrics.librato.com                              |
-| LIBRATO_USER             | Used for reporting stats - http://metrics.librato.com                              |
-| MEMCACHED_HOSTS          | Comma separated memcached hosts/ports - 192.168.1.2:11121                          |
-| POLYPTYCH_CDN            | Used for retrieving and serving favicons - https://github.com/feedbin/polyptych    |
-| POLYPTYCH_URL            | Used for retrieving and serving favicons - https://github.com/feedbin/polyptych    |
-| POSTGRES_USERNAME        | Used for connecting to database                                                    |
-| POSTMARK_API_KEY         | Used for sending email - http://postmarkapp.com                                    |
-| RACK_ENV                 | Environment - production                                                           |
-| RAILS_ENV                | Environment - production                                                           |
-| READABILITY_API_TOKEN    | Used for Readability - http://www.readability.com                                  |
-| REDIS_URL                | redis connection string - redis://redis:PASSWORD@192.168.1.3:6379                  |
-| SECRET_KEY_BASE          | Encryptions key for Rails - run `rake secret`                                      |
-| SIDEKIQ_PASSWORD         | Sidekiq Basic Auth Password                                                        |
-| STRIPE_API_KEY           | Used for communicating with stripe - https://stripe.com                            |
-| STRIPE_PUBLIC_KEY        | Used for communicating with stripe - https://stripe.com                            |
+Next clone the repository and install the application dependencies
 
-These variables need to be available in the environment of the user running the app.
+    git clone https://github.com/feedbin/feedbin.git
+    cd feedbin
+    bundle
 
-Locally I use [dotenv](https://github.com/bkeepers/dotenv) combined with [pow](http://pow.cx/). Pow's `.powenv` file is set up to read dotenv's .env file like:
+If you encounter any errors after running `bundle` there is a problem installing one of the dependencies. You must find out how to get this dependency installed on your platform.
 
-```shell
-export $(cat .env)
-```
+**Configure**
 
-This is necessary so the environment variables can be read by both Pow and Unicorn.
+Feedbin uses environment variables for configuration. Feedbin will run without most of these, but various features and functionality will be turned off.
 
-In production environment variables are set in the `app` users ~/.bash_profile like: 
+Rename [.env.example](.env.example) to `.env` and customize it with your settings.
 
-```shell
-export AWS_ACCESS_KEY_ID=aoisjf3j23oij23f
-...
-```
+**Setup the database**
 
-### Feedbin Install Guides
+    rake db:setup
 
-- [Mac OS X](doc/INSTALL-mac.md)
-- [Ubuntu](doc/INSTALL-ubuntu.md) (incomplete)
-- [Fedora 19](doc/INSTALL-fedora.md)
+**Start the processes**
+
+    bundle exec foreman start
+
+
+Status Badges
+-------------
+[![Build Status](https://travis-ci.org/feedbin/feedbin.svg?branch=master)](https://travis-ci.org/feedbin/feedbin)
+
+[![Code Climate](https://codeclimate.com/github/feedbin/feedbin.svg)](https://codeclimate.com/github/feedbin/feedbin)
+
+[![Coverage Status](https://coveralls.io/repos/github/feedbin/feedbin/badge.svg)](https://coveralls.io/github/feedbin/feedbin)

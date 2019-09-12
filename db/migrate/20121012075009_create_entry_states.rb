@@ -1,5 +1,4 @@
-class CreateEntryStates < ActiveRecord::Migration
-  
+class CreateEntryStates < ActiveRecord::Migration[4.2]
   def change
     create_table :entry_states do |t|
       t.integer :user_id
@@ -9,11 +8,9 @@ class CreateEntryStates < ActiveRecord::Migration
 
       t.timestamps
     end
-    
+
     add_index :entry_states, :user_id
     add_index :entry_states, :entry_id
     add_index :entry_states, [:user_id, :entry_id], unique: true
-    
   end
-  
 end

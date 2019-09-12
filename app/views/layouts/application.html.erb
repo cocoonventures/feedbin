@@ -1,37 +1,34 @@
-<% content_for :content do %>
-  <%= yield(:sidebar) %>
-
-  <div class="modal-target"></div>
-  <header class="bar">
-		<a href="/" class="logo"><%= render partial: 'shared/svg/logo' %></a>
-			
-    <% if signed_in? %>
-    <div class="subscribe-wrap">
-      
-      <%= render partial: "subscriptions/form" %>
-      <div class="popover right hide">
-        <div class="arrow"></div>
-        <div class="popover-content">
-        </div>
-      </div>
-    </div>
-    <% end %>
-
-    <div class="account-buttons">
-      <% if signed_in? %>
-        <%= link_to 'Settings', settings_path %>
-        <%= link_to "Log Out", logout_path, method: "delete", class: 'logout-link' %>
-      <% else %>
-        <%= link_to 'Sign Up', signup_path %>
-        <%= link_to 'Log In', login_path %>
-      <% end %>
-    </div>
-
-  </header>
-	
-  <div class="content">
-    <%= content_for?(:app_content) ? yield(:app_content) : yield %>
-  </div>
-
-<% end %>
-<%= render template: 'layouts/wrap' %>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%= @title || 'Feedbin' %><%= branch_info if Rails.env.development? %></title>
+        <meta name="viewport" content="initial-scale=1.0,width=device-width,user-scalable=no,viewport-fit=cover" />
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <link rel="mask-icon" href="<%= asset_path('website-icon.svg') %>" color="#000000" />
+        <link rel="icon" href="<%= asset_path('link-icon.png') %>" sizes="192x192" />
+        <link rel="apple-touch-icon-precomposed" href="<%= asset_path('apple-touch-icon-precomposed.png') %>" sizes="152x152" />
+        <link rel="shortcut icon" href="<%= asset_path('favicon.ico') %>" type="image/vnd.microsoft.icon" />
+        <%= stylesheet_link_tag "application", media: "all"  %>
+        <%= javascript_include_tag "lib/lib"  %>
+        <%= javascript_include_tag "application"  %>
+        <% if native? %>
+            <%= javascript_include_tag "lib/turbolinks"  %>
+            <script>
+                feedbin.native = true
+                $(function() {
+                    $('body').addClass('standalone-navigator');
+                    $('body').addClass('native');
+                });
+            </script>
+        <% end %>
+        <%= yield(:head) %>
+        <%= csrf_meta_tags %>
+        <%= tag :meta, name: "stripe-key", content: STRIPE_PUBLIC_KEY %>
+    </head>
+    <body class="<%= @class %>" data-behavior="<%= @behavior %>">
+        <%= content_for?(:content) ? yield(:content) : yield %>
+        <%= render partial: "shared/modals/modal" %>
+        <%= render partial: "shared/theme_colors" %>
+    </body>
+</html>
